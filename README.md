@@ -1,5 +1,8 @@
 # ChessBlocker
 
+I have just forked the eronnen/ChessBlocker repository because the extension did not work for me with Lichess properly.
+So, I have fixed the bugs with Cursor.
+
 ChessBlocker is a chrome extension that limits the number of chess games you play per day on **Chess.com** and **Lichess**.
 
 <img src="./static/images/ChessBlocker256.png">
