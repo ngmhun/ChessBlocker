@@ -21,6 +21,21 @@ You can install the original (not fixed) extension via the [extension page](http
 4. Click on "Load unpacked" and select the `dist` folder
 5. Configure your username in the options page
 
+## Arch Linux package
+
+For a personal install that Chromium loads automatically, build from `packaging/`:
+
+```bash
+cd packaging
+makepkg -si
+```
+
+`makepkg` clones the matching release tag, builds the extension, packs a `.crx`, and installs it so Chromium picks it up from `/usr/share/chromium/extensions/`.
+
+The first build writes `packaging/chessblocker.pem`. Keep that file; it pins the extension id so Chromium keeps your settings across upgrades.
+
+After install, quit Chromium completely (including background processes), start it again, then set your username on the extension options page.
+
 ## How it works
 
 - The user configures his username in the extension settings, and the number of games permitted to play every day.
