@@ -128,3 +128,11 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Arch package build (packaging/PKGBUILD)
+/packaging/src/
+/packaging/pkg/
+/packaging/*.pkg.tar*
+/packaging/*.tar.gz
+/packaging/*.log
+/packaging/chessblocker.pem

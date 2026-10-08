@@ -1,0 +1,76 @@
+pkgname=chromium-chessblocker
+pkgver=0.2.1
+pkgrel=1
+pkgdesc='Limit daily chess games on Chess.com and Lichess'
+arch=(any)
+url='https://github.com/ngmhun/ChessBlocker'
+license=(MIT)
+depends=(chromium)
+makedepends=(git npm chromium openssl)
+options=(!strip !debug)
+install=chessblocker.install
+source=("git+${url}.git#tag=${pkgver}")
+sha256sums=('SKIP')
+
+build() {
+  cd ChessBlocker
+
+  local key="${startdir}/chessblocker.pem"
+  if [[ ! -f ${key} ]]; then
+    echo "Generating ${key}"
+    echo "Keep this file. It pins the extension id, so Chromium keeps your settings across upgrades."
+    openssl genrsa -out "${key}" 2048
+    chmod 600 "${key}"
+  fi
+
+  npm ci --include=dev
+  npm run build
+
+  local version
+  version="$(node -p "require('./dist/manifest.json').version")"
+  if [[ ${version} != "${pkgver}" ]]; then
+    printf 'manifest version %s does not match pkgver %s\n' "${version}" "${pkgver}" >&2
+    return 1
+  fi
+
+  chromium \
+    --pack-extension="${PWD}/dist" \
+    --pack-extension-key="${key}" \
+    --no-sandbox \
+    --disable-gpu \
+    --no-first-run
+}
+
+package() {
+  cd ChessBlocker
+
+  local key="${startdir}/chessblocker.pem"
+  local id version json
+
+  id="$(
+    python3 - "${key}" <<'PY'
+import hashlib, subprocess, sys
+
+pem = open(sys.argv[1], "rb").read()
+der = subprocess.check_output(
+    ["openssl", "rsa", "-pubout", "-outform", "DER"],
+    input=pem,
+)
+digest = hashlib.sha256(der).hexdigest()[:32]
+print(digest.translate(str.maketrans("0123456789abcdef", "abcdefghijklmnop")))
+PY
+  )"
+  version="$(node -p "require('./dist/manifest.json').version")"
+
+  install -Dm644 dist.crx "${pkgdir}/usr/lib/${pkgname}/chessblocker.crx"
+  install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+
+  json="${srcdir}/${id}.json"
+  cat > "${json}" <<EOF
+{
+  "external_crx": "/usr/lib/${pkgname}/chessblocker.crx",
+  "external_version": "${version}"
+}
+EOF
+  install -Dm644 "${json}" "${pkgdir}/usr/share/chromium/extensions/${id}.json"
+}
