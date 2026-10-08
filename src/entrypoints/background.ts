@@ -17,6 +17,7 @@ chrome.runtime.onMessage.addListener((message, sender, senderResponse) => {
         disableRulesetIds: [message.website + "_new_game_link"],
       })
       .then(senderResponse);
+    return true;
   } else if (message.type == "disallow-new-game-link") {
     console.debug("disallowing new game links");
     chrome.declarativeNetRequest.updateEnabledRulesets({

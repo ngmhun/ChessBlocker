@@ -120,32 +120,35 @@ function addListenersToPoolElements(parentElement: HTMLElement) {
   }
 }
 
-function addListenersToRightControl(finishedGameElement: HTMLElement) {
-  if (!finishedGameElement.classList.contains("follow-up")) {
-    return;
-  }
+function installNewOpponentLimitCheck() {
+  // Lichess draws this as <button class="new-opponent"> and then sets
+  // location.href. The label is translated, so match the class.
+  // Capture on document still sees the button after the game ends and the
+  // controls are re-rendered.
+  document.addEventListener(
+    "click",
+    (event: MouseEvent) => {
+      if (!(event.target instanceof Element)) {
+        return;
+      }
+      if (!event.target.closest("button.new-opponent")) {
+        return;
+      }
 
-  for (const newGameLink of finishedGameElement.querySelectorAll("a.fbt")) {
-    if (
-      (newGameLink as HTMLElement).innerText.toLowerCase() == "new opponent"
-    ) {
-      (newGameLink as HTMLElement).addEventListener(
-        "click",
-        (event: MouseEvent) => {
-          playButtonHandler(
-            event,
-            LICHESS,
-            true,
-            getLichessPlayerLastDayGamesTimes,
-          );
-        },
+      playButtonHandler(
+        event,
+        LICHESS,
         true,
+        getLichessPlayerLastDayGamesTimes,
       );
-    }
-  }
+    },
+    true,
+  );
 }
 
 async function initializeChessBlocker() {
+  installNewOpponentLimitCheck();
+
   const pagePath = document.location.pathname;
   if (pagePath == "/") {
     // home: quick pairing, Lobby
@@ -224,34 +227,6 @@ async function initializeChessBlocker() {
     );
     console.debug("ChessBlocker: start observing lobby table for create game dialog");
     createGameObserver.observe(lobbyTableElement, {
-      childList: true,
-      subtree: false,
-    });
-  } else if (pagePath.match(/^\/[0-9a-z]{12}$/i)) {
-    // the user's game
-    // 12 characters is an ongoign game link. a finished game/ watching other game has 8 characters
-    const rcontrolsObserver = new MutationObserver((mutationList) => {
-      for (const mutation of mutationList) {
-        for (const addedNode of mutation.addedNodes) {
-          if (!(addedNode instanceof Element)) {
-            continue;
-          }
-
-          addListenersToRightControl(addedNode as HTMLElement);
-        }
-      }
-    });
-
-    const rcontrolsElement = await waitForElementToExist(
-      undefined,
-      "div.rcontrols",
-    );
-
-    // add listeners to existing elements before observing
-    for (const child of rcontrolsElement.children) {
-      addListenersToRightControl(child as HTMLElement);
-    }
-    rcontrolsObserver.observe(rcontrolsElement, {
       childList: true,
       subtree: false,
     });
