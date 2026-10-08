@@ -7,11 +7,11 @@ ChessBlocker is a chrome extension that limits the number of chess games you pla
 
 <img src="./static/images/ChessBlocker256.png">
 
-## Installation
+## Installation of the original (not fixed) extension
 
-Install via the [extension page](https://chrome.google.com/webstore/detail/chessblocker/gmljndohgoeckmkhnkbnbbnhnlifkhfk?hl=en]).
+You can install the original (not fixed) extension via the [extension page](https://chrome.google.com/webstore/detail/chessblocker/gmljndohgoeckmkhnkbnbbnhnlifkhfk?hl=en]).
 
-## Development
+## Installation and testing this version
 
 1. Clone/Download the project
 2. Setup node and build
